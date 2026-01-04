@@ -1,9 +1,11 @@
 <script lang="ts">
   import { createGrid, placeMines, revealCell, DIRECTIONS, type Cell } from '$lib/minesweeper';
   import { onMount, onDestroy } from 'svelte';
-  import { Flag, Bomb, Grid3x3, Wrench, X, Flame, Skull, Flower2, User, LogOut, Clock, Hourglass, Infinity as InfinityIcon } from 'lucide-svelte';
+  import { Flag, Bomb, Grid3x3, Wrench, X, Flame, Skull, Flower2, User, LogOut, Clock, Hourglass, Infinity as InfinityIcon, Palette, Search, ChevronRight } from 'lucide-svelte';
   import ResultView from '$lib/ResultView.svelte';
   import { supabase } from '$lib/supabase';
+  import { THEMES } from '$lib/themes';
+  import { currentTheme } from '$lib/themeStore';
 
   const GRID_SIZES = [
     { label: '9x9', rows: 9, cols: 9, mines: 10 },
@@ -16,12 +18,15 @@
   // --- SETTINGS ---
   let gameMode: 'time' | 'standard' = 'time'; 
   let currentSize = GRID_SIZES[0]; 
-  let timeLimit = 15; // CHANGED: Default is now 15s
+  let timeLimit = 15;
   let customTime = 60;
   let isCustomTime = false;
 
-  let showCustomModal = false;
-  let customRows = 20, customCols = 20, customMines = 50;
+  // --- COMMAND PALETTE STATE ---
+  let showPalette = false;
+  let paletteView: 'root' | 'themes' = 'root';
+  let searchQuery = '';
+  let searchInputEl: HTMLInputElement;
 
   // --- GAME STATE ---
   let grid: Cell[][] = [];
@@ -53,20 +58,29 @@
     return Bomb;
   })();
 
+  // --- FILTERING LOGIC ---
+  $: filteredThemes = THEMES.filter(t => t.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  
+  // Commands List (Expandable later)
+  const COMMANDS = [
+      { id: 'theme', label: 'Theme...', icon: Palette, action: () => { paletteView = 'themes'; searchQuery = ''; searchInputEl?.focus(); } },
+      // You can add { id: 'custom', label: 'Custom Game...', icon: Wrench, ... } here later
+  ];
+
+  $: filteredCommands = COMMANDS.filter(c => c.label.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // --- ACTIONS ---
+  function openPalette() {
+      showPalette = true;
+      paletteView = 'root';
+      searchQuery = '';
+      setTimeout(() => searchInputEl?.focus(), 50); // Focus input after render
+  }
+
   function setMode(mode: 'time' | 'standard') { gameMode = mode; fullReset(); }
   function setSize(size: typeof GRID_SIZES[0]) { currentSize = size; fullReset(); }
   function setTime(t: number) { timeLimit = t; isCustomTime = false; fullReset(); }
   function setCustomTime() { isCustomTime = true; timeLimit = customTime; fullReset(); }
-
-  function applyCustom() {
-    if (customRows < 5) customRows = 5;
-    if (customCols < 5) customCols = 5;
-    const maxMines = (customRows * customCols) - 9; 
-    if (customMines > maxMines) customMines = maxMines;
-    currentSize = { label: 'custom', rows: customRows, cols: customCols, mines: customMines };
-    showCustomModal = false;
-    fullReset();
-  }
 
   function countCurrentSafeOpen() {
       let count = 0;
@@ -219,15 +233,22 @@
   }
 
   function handleInput(e: KeyboardEvent) {
-    if (showCustomModal && e.key !== 'Escape') return; 
+    if (showPalette) {
+        if (e.key === 'Escape') {
+            if (paletteView === 'themes') {
+                paletteView = 'root';
+                searchQuery = '';
+            } else {
+                showPalette = false;
+            }
+        }
+        return; 
+    }
 
     // Handle Tab Restart Logic
     if (e.key === 'Tab') {
         const active = document.activeElement;
-        // If focus is inside an input, let default Tab work
-        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
-            return;
-        }
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
         e.preventDefault();
         fullReset();
         return;
@@ -239,14 +260,13 @@
         if (gameState === 'playing') {
              finishSession();
         } else {
-             showCustomModal = !showCustomModal;
+             openPalette();
         }
         return;
     }
 
     if (e.code === 'Space') {
       e.preventDefault(); 
-      // REMOVED: gameState === 'finished' check so space only interacts with game cells, not restart.
       if (hoveredCell) {
         const { r, c } = hoveredCell;
         const cell = grid[r][c];
@@ -301,7 +321,7 @@
 
 <svelte:window on:keydown={handleInput} on:mouseup={() => isMouseDown = false} />
 
-<div class="min-h-screen bg-bg text-text flex flex-col items-center font-mono relative">
+<div class="min-h-screen bg-bg text-text flex flex-col items-center font-mono relative transition-colors duration-300">
   
   <div class="w-full max-w-5xl flex justify-between items-center p-8 mb-0 animate-in fade-in slide-in-from-top-4 duration-500">
       <div class="flex items-center gap-2 select-none transition-colors duration-300 {gameState === 'playing' ? 'opacity-50 grayscale' : 'opacity-100'}">
@@ -369,7 +389,7 @@
             {#each GRID_SIZES as size}
                 <button class="transition-colors duration-200 {currentSize.label === size.label ? 'text-main font-bold' : 'text-sub hover:text-text'}" on:click={() => setSize(size)}>{size.label}</button>
             {/each}
-            <button class="transition-colors duration-200 {currentSize.label === 'custom' ? 'text-main' : 'text-sub hover:text-text'}" on:click={() => showCustomModal = true}><Wrench size={12} /></button>
+            <button class="transition-colors duration-200 text-sub hover:text-text" on:click={openPalette}><Wrench size={12} /></button>
         </div>
     </div>
 
@@ -421,40 +441,114 @@
     </div>
   {/if}
 
-  {#if showCustomModal}
-    <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-[#191919] border border-sub/20 p-6 rounded-lg shadow-xl w-80 text-text font-mono">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-main">Custom Config</h2>
-                <button on:click={() => showCustomModal = false} class="text-sub hover:text-text"><X size={20} /></button>
+{#if showPalette}
+    <div 
+        class="fixed inset-0 bg-black/60 flex items-start justify-center z-50 backdrop-blur-sm animate-in fade-in duration-150"
+        on:mousedown|self={() => showPalette = false}
+    >
+        <div class="bg-bg border border-sub/20 rounded-lg shadow-2xl w-[450px] text-text font-mono mt-[15vh] overflow-hidden flex flex-col max-h-[50vh]">
+            
+            <div class="flex items-center gap-3 p-3 border-b border-sub/10">
+                <Search size={14} class="text-main" />
+                <input 
+                    bind:this={searchInputEl}
+                    bind:value={searchQuery}
+                    type="text" 
+                    placeholder={paletteView === 'root' ? "Type to search..." : "Search themes..."}
+                    class="bg-transparent border-none outline-none text-xs text-text placeholder:text-sub/50 w-full h-full"
+                    on:keydown={(e) => {
+                        if (e.key === 'Backspace' && searchQuery === '' && paletteView === 'themes') {
+                            paletteView = 'root';
+                        }
+                    }}
+                />
+                {#if paletteView === 'themes'}
+                    <span class="text-[10px] bg-sub/20 px-1.5 py-0.5 rounded text-sub uppercase tracking-wider">Themes</span>
+                {/if}
             </div>
-            <div class="space-y-4">
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-sub uppercase">Rows</label>
-                    <input type="number" bind:value={customRows} class="bg-sub/10 border border-sub/20 rounded p-2 text-text outline-none" />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-sub uppercase">Columns</label>
-                    <input type="number" bind:value={customCols} class="bg-sub/10 border border-sub/20 rounded p-2 text-text outline-none" />
-                </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-sub uppercase">Mines</label>
-                    <input type="number" bind:value={customMines} class="bg-sub/10 border border-sub/20 rounded p-2 text-text outline-none" />
+
+            <div class="overflow-y-auto p-1.5">
+                {#if paletteView === 'root'}
+                    {#each filteredCommands as cmd}
+                        <button 
+                            class="w-full flex items-center justify-between py-1.5 px-2 rounded hover:bg-sub/10 text-left group transition-colors text-xs"
+                            on:click={cmd.action}
+                        >
+                            <div class="flex items-center gap-3">
+                                <svelte:component this={cmd.icon} size={12} class="text-sub group-hover:text-main transition-colors" />
+                                <span class="group-hover:text-text text-sub/80 transition-colors">{cmd.label}</span>
+                            </div>
+                            <ChevronRight size={12} class="text-sub/40 group-hover:text-main transition-colors" />
+                        </button>
+                    {/each}
+                    {#if filteredCommands.length === 0}
+                         <div class="p-3 text-center text-sub opacity-50 italic text-[10px]">No commands found...</div>
+                    {/if}
+
+                {:else if paletteView === 'themes'}
+                    {#each filteredThemes as theme}
+                        <button 
+                            class="w-full flex items-center justify-between py-1 px-2 rounded hover:bg-sub/10 text-left group transition-colors text-xs {$currentTheme.name === theme.name ? 'bg-main/5' : ''}"
+                            on:click={() => { $currentTheme = theme; showPalette = false; }}
+                        >
+                            <div class="flex items-center gap-3">
+                                <div class="flex gap-1">
+                                    <div class="w-2 h-2 rounded-full border border-white/10" style="background-color: rgb({theme.colors.bg})"></div>
+                                    <div class="w-2 h-2 rounded-full border border-white/10" style="background-color: rgb({theme.colors.main})"></div>
+                                    <div class="w-2 h-2 rounded-full border border-white/10" style="background-color: rgb({theme.colors.error})"></div>
+                                </div>
+                                <span class="group-hover:text-text text-sub/80 transition-colors {$currentTheme.name === theme.name ? 'text-main font-bold' : ''}">
+                                    {theme.label}
+                                </span>
+                            </div>
+                            {#if $currentTheme.name === theme.name}
+                                <span class="text-[9px] bg-main/20 text-main px-1.5 py-0 rounded">Active</span>
+                            {/if}
+                        </button>
+                    {/each}
+                    {#if filteredThemes.length === 0}
+                         <div class="p-3 text-center text-sub opacity-50 italic text-[10px]">No themes found...</div>
+                    {/if}
+                {/if}
+            </div>
+            
+            <div class="bg-sub/5 p-1.5 text-[10px] text-sub flex justify-between px-3 select-none border-t border-sub/10">
+                <span>navigate with arrows</span>
+                <div class="flex gap-3">
+                     <span><kbd class="bg-sub/20 px-1 rounded">esc</kbd> close</span>
+                     <span><kbd class="bg-sub/20 px-1 rounded">↵</kbd> select</span>
                 </div>
             </div>
-            <button on:click={applyCustom} class="w-full mt-6 bg-sub/20 hover:bg-main hover:text-bg text-main font-bold py-2 rounded transition-colors">Start</button>
+
         </div>
     </div>
   {/if}
 
-  <div class="fixed bottom-8 text-xs text-sub opacity-40 font-mono flex gap-6 transition-opacity duration-300 {gameState === 'playing' ? 'opacity-0' : 'opacity-100'}">
-      <div class="flex items-center gap-2">
-          <kbd class="bg-sub/20 px-1.5 py-0.5 rounded text-text">tab</kbd>
-          <span>- restart test</span>
+       <div class="fixed bottom-8 w-full px-8 flex justify-between text-xs text-sub opacity-40 font-mono transition-opacity duration-300 {gameState === 'playing' ? 'opacity-0' : 'opacity-100'}">
+      <div class="flex gap-6">
+          <div class="flex items-center gap-2">
+              <kbd class="bg-sub/20 px-1.5 py-0.5 rounded text-text">tab</kbd>
+              <span>- restart test</span>
+          </div>
+          <div class="flex items-center gap-2">
+              <kbd class="bg-sub/20 px-1.5 py-0.5 rounded text-text">esc</kbd>
+              <span>- settings</span>
+          </div>
       </div>
-      <div class="flex items-center gap-2">
-          <kbd class="bg-sub/20 px-1.5 py-0.5 rounded text-text">esc</kbd>
-          <span>- settings</span>
+
+      <div class="flex gap-6">
+          <button 
+              class="flex items-center gap-2 hover:text-text transition-colors"
+              on:click={openPalette}
+          >
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+              <span>{$currentTheme.label}</span> 
+          </button>
+
+          <div class="flex items-center gap-2 cursor-default select-none">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 14V6a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v11l-3-3"/><path d="M14 6a2 2 0 0 0-2-2"/></svg>
+              <span>v1.0.0</span>
+          </div>
       </div>
   </div>
 

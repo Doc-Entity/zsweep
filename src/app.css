@@ -1,20 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  /* This automatically creates classes like bg-bg, text-main, etc. */
-  --color-bg: #191919;
-  --color-main: #d8b4fe;
-  --color-sub: #71717a;
-  --color-text: #e4e4e7;
-  --color-error: #ef4444;
-
-  --font-mono: "JetBrains Mono", monospace;
-}
-
-/* Base styles */
-body {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-mono);
-  overflow: hidden; /* Keeps the game screen fixed */
+:root {
+  /* ... keep your theme variables here ... */
+  --bg: 25 25 25;
+  --main: 216 180 254;
+  /* etc */
 }
