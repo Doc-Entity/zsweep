@@ -15,7 +15,11 @@
         1.95'/%3E%3Cpath d='m22 2-1.5 1.5'/%3E%3C/svg%3E"
 	/>
 
+<<<<<<< HEAD
 	<title>Zsweep | A minimalistic, customizable minesweeper</title>
+=======
+	<title>Zsweep</title>
+>>>>>>> ff2ed18c9b59193558c8d8e8ce9faf127046902e
 
 	<meta
 		name="description"
@@ -27,7 +31,7 @@
 		{
 			"@context": "https://schema.org",
 			"@type": "WebSite",
-			"name": "ZenSweep",
+			"name": "Zsweep",
 			"url": "https://zsweep.com",
 			"potentialAction": {
 				"@type": "SearchAction",
