@@ -92,35 +92,27 @@ Whether you are a competitive sweeper or just looking for a zen break, zsweep is
 To get a local copy up and running for development or contribution, follow these steps.
 
 ### Prerequisites
-
-* npm
-  ```sh
+npm
+```sh
   npm install npm@latest -g
+```
 
 ### Installation
 Clone the repo
-
 ```Bash
-
 git clone [https://github.com/oug-t/zsweep.git](https://github.com/oug-t/zsweep.git)
+```
+
 Install NPM packages
-```
-
 ```Bash
-
 npm install
-Setup Environment Variables Create a .env file in the root directory and add your Supabase credentials:
 ```
 
+Setup Environment Variables Create a .env file in the root directory and add your Supabase credentials:
 ```Code snippet
-
 PUBLIC_SUPABASE_URL=your_supabase_url
 PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 Run the development server
-```
-
-```Bash
-
 npm run dev
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -152,7 +144,7 @@ npm run dev
 
 - Contributions are what make the open source community such an amazing place to learn, inspire, and create. Whether you are fixing a typo, optimizing the 3BV algorithm, or adding a new theme, your help is greatly appreciated.
 
-### 🏆 Contributor Perk: All contributors who have a PR merged will be permanently listed on the zsweep "About" page as a thank you for helping build this project.
+- 🏆 Contributor Perk: All contributors who have a PR merged will be listed on the "About" page as a gratidude.
 
 - If you have a suggestion that would make this better:
 
