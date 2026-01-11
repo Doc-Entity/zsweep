@@ -592,6 +592,45 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Zsweep | The Vim-Optimized Minesweeper</title>
+	<meta
+		name="description"
+		content="Play Minesweeper without a mouse. Zsweep is a modern, keyboard-driven implementation of the classic game, optimized for speed and efficiency with Vim motions."
+	/>
+
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://zsweep.com/" />
+	<meta property="og:title" content="Zsweep | The Vim-Optimized Minesweeper" />
+	<meta
+		property="og:description"
+		content="Master the grid using only your keyboard. H, J, K, L your way to victory."
+	/>
+	<meta property="og:image" content="https://zsweep.com/og-image.png" />
+
+	<meta property="twitter:card" content="summary_large_image" />
+	<meta property="twitter:url" content="https://zsweep.com/" />
+	<meta property="twitter:title" content="Zsweep | The Vim-Optimized Minesweeper" />
+	<meta
+		property="twitter:description"
+		content="Master the grid using only your keyboard. H, J, K, L your way to victory."
+	/>
+	<meta property="twitter:image" content="https://zsweep.com/og-image.png" />
+
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "VideoGame",
+			"name": "Zsweep",
+			"url": "https://zsweep.com",
+			"description": "A keyboard-driven Minesweeper clone optimized for Vim users.",
+			"genre": "Puzzle",
+			"operatingSystem": "Web Browser",
+			"applicationCategory": "Game"
+		}
+	</script>
+</svelte:head>
+
 <svelte:window on:keydown={handleInput} on:mouseup={() => (isMouseDown = false)} />
 
 <div
