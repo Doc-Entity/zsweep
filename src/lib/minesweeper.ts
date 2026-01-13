@@ -142,6 +142,7 @@ export function revealCellsAround(
 			if (result.win) {
 				win = true;
 			}
+			grid = result.grid;
 		}
 	});
 
