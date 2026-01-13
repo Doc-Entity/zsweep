@@ -223,14 +223,14 @@
 		}
 	}
 
-	function toggleFlag(r: number, c: number) {
-		if (gameState === 'finished' || grid[r][c].isOpen) return;
-		grid[r][r].isFlagged = !grid[r][c].isFlagged;
-		minesLeft += grid[r][c].isFlagged ? -1 : 1;
-		totalClicks++;
-		clicksThisSecond++;
-		grid = grid;
-	}
+    function toggleFlag(r: number, c: number) {
+        if (gameState === 'finished' || grid[r][c].isOpen) return;
+        grid[r][c].isFlagged = !grid[r][c].isFlagged; // <--- Change to [r][c]
+        minesLeft += grid[r][c].isFlagged ? -1 : 1;
+        totalClicks++;
+        clicksThisSecond++;
+        grid = grid;
+    }
 
 	function attemptChord(r: number, c: number) {
 		const cell = grid[r][c];
