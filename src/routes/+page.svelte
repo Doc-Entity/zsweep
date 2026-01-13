@@ -42,9 +42,10 @@
 		{ label: '16x16', rows: 16, cols: 16, mines: 40 },
 		{ label: '30x16', rows: 16, cols: 30, mines: 99 }
 	];
+    const TIME_LIMITS = [15, 30, 60];
 
 	// --- STATE ---
-	let gameMode: 'time' | 'standard' = 'time';
+	let gameMode: 'time' | 'standard' = 'standard';
 	let currentSize = GRID_SIZES[0];
 	let timeLimit = 15;
 	let customTime = 60;
@@ -127,11 +128,26 @@
 
 	function setMode(mode: 'time' | 'standard') {
 		gameMode = mode;
+
+        if (gameMode === 'time' && currentSize.label !== '9x9') {
+            currentSize = GRID_SIZES[0];
+        }
+
 		fullReset();
 	}
 
+    function setTime(seconds: number) {
+        timeLimit = seconds;
+        fullReset();
+    }
+
 	function setSize(size: (typeof GRID_SIZES)[0]) {
 		currentSize = size;
+
+        if (currentSize.label !== '9x9' && gameMode ==='time') {
+            gameMode = 'standard'
+        }
+
 		fullReset();
 	}
 
@@ -552,25 +568,35 @@ async function saveResult(win: boolean) {
 			on:restart={fullReset}
 		/>
 	{:else}
-		<div class="mb-8 flex select-none items-center gap-6 rounded-lg bg-sub/10 px-4 py-2 text-xs transition-all duration-300 {gameState === 'playing' ? 'pointer-events-none opacity-0' : 'opacity-100'}">
+        <div class="mb-8 flex select-none items-center gap-6 rounded-lg bg-sub/10 px-4 py-2 text-xs transition-all duration-300 {gameState === 'playing' ? 'pointer-events-none opacity-0' : 'opacity-100'}">
+			
 			<div class="flex items-center gap-3">
-				<button class="flex items-center gap-2 transition-colors {gameMode === 'time' ? 'font-bold text-main' : 'text-sub'}" on:click={() => setMode('time')}>
-					<Hourglass size={12} /><span>time</span>
-				</button>
-				<button class="flex items-center gap-2 transition-colors {gameMode === 'standard' ? 'font-bold text-main' : 'text-sub'}" on:click={() => setMode('standard')}>
+				<button class="flex items-center gap-2 transition-colors {gameMode === 'standard' ? 'font-bold text-main' : 'text-sub hover:text-text'}" on:click={() => setMode('standard')}>
 					<InfinityIcon size={12} /><span>standard</span>
 				</button>
+				<button class="flex items-center gap-2 transition-colors {gameMode === 'time' ? 'font-bold text-main' : 'text-sub hover:text-text'}" on:click={() => setMode('time')}>
+					<Hourglass size={12} /><span>time</span>
+				</button>
 			</div>
+
 			<div class="h-3 w-[1px] bg-sub/20"></div>
+
 			<div class="flex items-center gap-3">
-				<Grid3x3 size={12} class="text-sub opacity-50" />
-				{#each GRID_SIZES as size}
-					<button class="{currentSize.label === size.label ? 'font-bold text-main' : 'text-sub hover:text-text'}" on:click={() => setSize(size)}>{size.label}</button>
-				{/each}
-				<button class="text-sub hover:text-text" on:click={openPalette}><Wrench size={12} /></button>
+				{#if gameMode === 'standard'}
+					<Grid3x3 size={12} class="text-sub opacity-50" />
+					{#each GRID_SIZES as size}
+						<button class="{currentSize.label === size.label ? 'font-bold text-main' : 'text-sub hover:text-text'}" on:click={() => setSize(size)}>{size.label}</button>
+					{/each}
+				{:else}
+					<Hourglass size={12} class="text-sub opacity-50" />
+					{#each TIME_LIMITS as t}
+						<button class="{timeLimit === t ? 'font-bold text-main' : 'text-sub hover:text-text'}" on:click={() => setTime(t)}>{t}s</button>
+					{/each}
+				{/if}
+
+				<button class="ml-2 text-sub hover:text-text" on:click={openPalette}><Wrench size={12} /></button>
 			</div>
 		</div>
-
 		<div class="animate-in fade-in flex flex-col gap-2 duration-300">
 			<div class="mb-2 flex select-none items-end justify-between px-1 text-main">
 				<div class="flex w-12 flex-col">
@@ -642,4 +668,51 @@ async function saveResult(win: boolean) {
 			</div>
 		</div>
 	{/if}
+
+<div class="fixed bottom-6 left-0 right-0 flex w-full justify-between px-8 pointer-events-none select-none">
+		
+		<div class="flex flex-col gap-2 text-[10px] font-bold  tracking-widest text-sub transition-opacity duration-500 {gameState === 'playing' ? 'opacity-20' : 'opacity-60'}">
+			
+			<div class="flex items-center gap-3">
+				<kbd class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm">tab</kbd> 
+				<span class="h-[1px] w-3 bg-sub/30"></span> 
+				<span>restart</span>
+			</div>
+
+			<div class="flex items-center gap-3">
+				<kbd class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm">esc</kbd> 
+				<span class="h-[1px] w-3 bg-sub/30"></span> 
+				<span>settings</span>
+			</div>
+
+			<div class="flex items-center gap-3">
+				<kbd class="flex min-w-[36px] justify-center rounded bg-sub/20
+                px-1.5 py-0.5 font-mono text-text shadow-sm">enter</kbd> 
+				<span class="h-[1px] w-3 bg-sub/30"></span> 
+				<span>reveal</span>
+			</div>
+
+			<div class="flex items-center gap-3">
+				<kbd class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm">spc</kbd> 
+				<span class="h-[1px] w-3 bg-sub/30"></span> 
+				<span>flag / chord</span>
+			</div>
+
+			<div class="flex items-center gap-3">
+				<kbd class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm">vim</kbd> 
+				<span class="h-[1px] w-3 bg-sub/30"></span> 
+				<span>motions</span>
+			</div>
+
+		</div>
+
+		<div class="flex flex-col justify-end text-right text-[10px] font-bold uppercase tracking-widest text-sub transition-opacity duration-500 {gameState === 'playing' ? 'opacity-20' : 'opacity-60'}">
+			<div class="flex items-center gap-2">
+				<span>{$currentTheme.label}</span>
+				<Palette size={10} />
+			</div>
+		</div>
+	</div>
+
 </div>
+
