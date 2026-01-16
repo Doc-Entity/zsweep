@@ -40,7 +40,7 @@
 
 	$: timeObj = formatTime(data.stats.seconds);
 
-	// --- AUTH ---
+	// --- AUTHENTICATION ---
 	onMount(async () => {
 		const {
 			data: { session }
@@ -69,6 +69,27 @@
 			goto('/');
 		}
 	}
+
+	// --- CONTRIBUTORS FETCH ---
+	type Contributor = { login: string; avatar_url: string; html_url: string };
+	let contributors: Contributor[] = [];
+	const GITHUB_TOKEN = ''; // Optional token to avoid rate limits
+
+	onMount(async () => {
+		try {
+			const headers: Record<string, string> = {};
+			if (GITHUB_TOKEN) headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+
+			const res = await fetch('https://api.github.com/repos/oug-t/zsweep/contributors', {
+				headers
+			});
+			if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+			contributors = await res.json();
+		} catch (err) {
+			console.error('Failed to fetch contributors', err);
+			contributors = [];
+		}
+	});
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -287,21 +308,51 @@
 						<strong class="text-text">Chording Animation</strong> engine.
 					</p>
 
-					<div class="my-4">
-						<span class="mb-4 block text-xs font-bold uppercase tracking-widest text-sub opacity-50"
-							>Special thanks to our contributors</span
+					<!-- Contributors Grid (dynamic from GitHub API) -->
+					<section class="mb-16">
+						<h2 class="mb-4 flex items-center gap-2 text-lg font-bold uppercase text-text">
+							<svg
+								class="h-5 w-5 text-main"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 4v16m8-8H4"
+								/>
+							</svg>
+							Contributors
+						</h2>
+
+						<p class="mb-6 text-center text-sm text-sub">
+							Every contribution, from code to ideas, helps make <span class="font-bold text-main"
+								>zsweep</span
+							> better.
+						</p>
+
+						<div
+							class="grid grid-cols-2 justify-items-center gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
 						>
-						<a
-							href="https://github.com/oug-t/zsweep/graphs/contributors"
-							class="inline-block transition-opacity hover:opacity-80"
-						>
-							<img
-								src="https://contrib.rocks/image?repo=oug-t/zsweep"
-								alt="Contributors"
-								class="h-12"
-							/>
-						</a>
-					</div>
+							{#each contributors as c (c.login)}
+								<a
+									href={c.html_url}
+									target="_blank"
+									class="flex flex-col items-center text-xs text-sub hover:text-main"
+								>
+									<img
+  										src={c.avatar_url}
+  										alt={c.login}
+  										class="h-10 w-10 rounded-full border border-sub/20 object-cover"
+									/>
+									<span class="max-w-[60px] truncate text-center">{c.login}</span>
+								</a>
+							{/each}
+						</div>
+					</section>
 				</div>
 				
 				<!-- GitHub Links --> 
