@@ -31,6 +31,7 @@
 	import ResultView from '$lib/components/ResultView.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import CustomSettingsModal from '$lib/components/CustomSettingsModal.svelte';
+	import TutorialModal from '$lib/components/TutorialModal.svelte';
 
 	import type { PageData } from './$types';
 	export let data: PageData;
@@ -76,6 +77,8 @@
 		showCustomModal: false
 	};
 
+	let showTutorial = true;
+
 	let stats = {
 		clicks: 0,
 		clicksThisSecond: 0,
@@ -97,6 +100,11 @@
 
 	function openCustomModal() {
 		ui.showCustomModal = true;
+	}
+
+	function closeTutorial() {
+		showTutorial = false;
+		document.cookie = 'zsweep-visited=true; path=/; max-age=31536000; SameSite=Lax';
 	}
 
 	function applyCustomSettings(event: CustomEvent) {
@@ -744,6 +752,10 @@
 		currentTime={game.timeLimit}
 		on:apply={applyCustomSettings}
 	/>
+
+	{#if showTutorial}
+		<TutorialModal on:close={closeTutorial} />
+	{/if}
 
 	{#if search.active}
 		<div
