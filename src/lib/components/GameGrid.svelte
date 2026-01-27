@@ -51,15 +51,18 @@
           {vimMode && cursor.r === r && cursor.c === c
 					? 'z-10 ring-2 ring-main/50 brightness-110'
 					: ''}"
+				on:mouseup={(e) => {
+					if (e.button === 0) {
+						handleLeftClick(r, c);
+					}
+				}}
 				on:mousedown={(e) => {
 					if (e.button === 2) {
 						handleRightClick(r, c);
 					}
 				}}
-				on:mouseup={(e) => {
-					if (e.button === 0) {
-						handleLeftClick(r, c);
-					}
+				on:dblclick={() => {
+					handleRightClick(r, c);
 				}}
 				on:contextmenu|preventDefault
 				on:mouseenter={() => handleHover(r, c)}
