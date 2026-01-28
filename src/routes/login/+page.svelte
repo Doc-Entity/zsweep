@@ -98,7 +98,6 @@
 			regData = { username: '', email: '', password: '', verifyPassword: '' };
 		}
 	}
-
 </script>
 
 <div class="relative flex min-h-screen flex-col items-center bg-bg pt-20 font-mono text-text">
