@@ -38,7 +38,7 @@
 			if (touchFeedback?.r === r && touchFeedback?.c === c) {
 				touchFeedback = null;
 			}
-		}, 250);
+		}, 200);
 	}
 
 	function handleTouchStart(r: number, c: number) {
