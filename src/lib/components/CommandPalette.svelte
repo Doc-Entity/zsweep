@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Search, ChevronRight, Palette } from 'lucide-svelte';
-	import { THEMES } from '$lib/themes';
+	import { THEMES, type Theme } from '$lib/themes';
 	import { currentTheme } from '$lib/themeStore';
 	import { tick } from 'svelte';
 
@@ -137,7 +137,18 @@
 								</div>
 								<ChevronRight size={12} class="opacity-50" />
 							{:else}
-								<span>{item.label}</span>
+								{@const theme = item as Theme}
+								<div class="flex items-center gap-3">
+									<div class="flex items-center gap-0.5">
+										{#each [theme.colors.bg, theme.colors.main, theme.colors.sub] as color}
+											<span
+												class="h-2.5 w-2.5 rounded-full border border-white/10"
+												style="background-color: rgb({color})"
+											></span>
+										{/each}
+									</div>
+									<span>{theme.label}</span>
+								</div>
 							{/if}
 						</button>
 					{/each}
