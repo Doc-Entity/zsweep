@@ -18,6 +18,14 @@
 		{ keys: ['Esc'], desc: 'Cancel operator / Clear selection' }
 	];
 
+	//Added a few additional Vim motions, that worked
+	motions.push(
+		{ keys: ['{', '}'], desc: 'Jump to previous / next block of numbers (planned)' },
+		{ keys: ['0'], desc: 'Jump to first cell in current row (planned)' },
+		{ keys: ['$'], desc: 'Jump to last cell in current row (planned)' }
+	);
+
+
 	const operators = [
 		{
 			combo: ['Space / a'],
