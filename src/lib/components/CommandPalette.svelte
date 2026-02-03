@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Search, ChevronRight, Palette } from 'lucide-svelte';
+	import { Search, ChevronRight, Palette, Eye, EyeOff } from 'lucide-svelte';
 	import { THEMES, type Theme } from '$lib/themes';
 	import { currentTheme } from '$lib/themeStore';
+	import { zenMode } from '$lib/zenStore';
 	import { tick } from 'svelte';
 
 	export let show = false;
@@ -33,6 +34,15 @@
 				searchQuery = '';
 				selectedIndex = 0;
 				tick().then(() => searchInputEl?.focus());
+			}
+		},
+		{
+			id: 'zen',
+			label: 'Toggle Zen Mode',
+			icon: $zenMode ? EyeOff : Eye,
+			action: () => {
+				$zenMode = !$zenMode;
+				close();
 			}
 		}
 	];
