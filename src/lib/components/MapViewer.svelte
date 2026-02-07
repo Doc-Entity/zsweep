@@ -7,7 +7,12 @@
 	export let onClose: () => void;
 
 	function handleKey(e: KeyboardEvent) {
-		if (e.key === 'Escape') onClose();
+		const isEscape = e.key === 'Escape';
+		const isCtrlKey = e.ctrlKey && (e.key === '[' || e.key === 'c');
+
+		if (isEscape || isCtrlKey) {
+			onClose();
+		}
 	}
 </script>
 
