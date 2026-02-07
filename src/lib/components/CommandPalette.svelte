@@ -10,7 +10,8 @@
 		Asterisk,
 		Skull,
 		Radiation,
-		Flame
+		Flame,
+		LogOut
 	} from 'lucide-svelte';
 	import { THEMES, type Theme } from '$lib/themes';
 	import { currentTheme } from '$lib/themeStore';
@@ -102,11 +103,19 @@
 				selectedIndex = 0;
 				tick().then(() => searchInputEl?.focus());
 			}
+		},
+		{
+			id: 'quit',
+			label: 'Quit (:q)',
+			icon: LogOut,
+			action: () => attemptQuit()
 		}
 	];
 
-	$: filteredCommands = COMMANDS.filter((c) =>
-		c.label.toLowerCase().includes(searchQuery.toLowerCase())
+	$: filteredCommands = COMMANDS.filter(
+		(c) =>
+			c.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			(searchQuery === ':q' && c.id === 'quit')
 	);
 
 	$: currentItems =
@@ -118,13 +127,37 @@
 					? filteredLineNumbers
 					: filteredMineIcons;
 
+	function attemptQuit() {
+		try {
+			window.close();
+		} catch {}
+		if (!window.closed) {
+			window.location.href = 'https://start.duckduckgo.com';
+		}
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (!show) return;
 
+		// Prevent browser defaults and stop propagation to layout
 		if (['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(e.key)) {
 			e.stopPropagation();
 		}
 
+		// Handle Close / Back Logic
+		if (e.key === 'Escape' || (e.ctrlKey && (e.key === '[' || e.key === 'c'))) {
+			e.preventDefault();
+			if (paletteView !== 'root') {
+				paletteView = 'root';
+				searchQuery = '';
+				selectedIndex = 0;
+			} else {
+				close();
+			}
+			return;
+		}
+
+		// Handle Navigation
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			selectedIndex = (selectedIndex + 1) % currentItems.length;
@@ -133,15 +166,10 @@
 			selectedIndex = (selectedIndex - 1 + currentItems.length) % currentItems.length;
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
-			executeSelection(currentItems[selectedIndex]);
-		} else if (e.key === 'Escape') {
-			e.preventDefault();
-			if (paletteView !== 'root') {
-				paletteView = 'root';
-				searchQuery = '';
-				selectedIndex = 0;
+			if (paletteView === 'root' && (searchQuery === ':q' || searchQuery === ':wq')) {
+				attemptQuit();
 			} else {
-				close();
+				executeSelection(currentItems[selectedIndex]);
 			}
 		}
 	}

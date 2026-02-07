@@ -8,22 +8,59 @@
 	import { supabase } from '$lib/supabase';
 	import { currentTheme } from '$lib/themeStore';
 	import { zenMode } from '$lib/zenStore';
+	import CommandPalette from '$lib/components/CommandPalette.svelte';
 
 	$: isHomePage = $page.url.pathname === '/';
 	$: showZenUI = $zenMode && isHomePage;
 
-	import CommandPalette from '$lib/components/CommandPalette.svelte';
-
 	let currentUser: string | null = null;
 	let showPalette = false;
+	let lastKey = '';
+	let lastKeyTime = 0;
 
-	// Track seen state individually for each icon
 	let seenState = {
 		about: true,
 		manual: true
 	};
 
+	function attemptQuit() {
+		try {
+			window.close();
+		} catch {}
+		if (!window.closed) {
+			window.location.href = 'https://start.duckduckgo.com';
+		}
+	}
+
 	function handleGlobalKeydown(e: KeyboardEvent) {
+		// ZZ and ZQ Logic
+		if (e.shiftKey && !showPalette) {
+			const now = Date.now();
+			if (now - lastKeyTime > 1000) lastKey = '';
+
+			if (e.key === 'Z') {
+				if (lastKey === 'Z') {
+					attemptQuit();
+					lastKey = '';
+				} else {
+					lastKey = 'Z';
+				}
+			} else if (e.key === 'Q') {
+				if (lastKey === 'Z') {
+					attemptQuit();
+					lastKey = '';
+				} else {
+					lastKey = '';
+				}
+			} else {
+				lastKey = '';
+			}
+			lastKeyTime = now;
+		} else {
+			// Reset sequence if Shift isn't held or other keys pressed
+			if (e.key !== 'Shift') lastKey = '';
+		}
+
 		if (e.key === ':') {
 			e.preventDefault();
 			showPalette = !showPalette;
@@ -32,7 +69,8 @@
 
 		if (e.key === 'z' && !e.metaKey && !e.ctrlKey && !e.altKey && isHomePage) {
 			const active = document.activeElement;
-			const isInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+			const isInput =
+				active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
 			if (!isInput && !showPalette) {
 				e.preventDefault();
 				$zenMode = !$zenMode;
@@ -51,7 +89,8 @@
 
 		if (e.key === 'Tab') {
 			const active = document.activeElement;
-			const isInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+			const isInput =
+				active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
 
 			if (!isInput && $page.url.pathname !== '/') {
 				e.preventDefault();
@@ -78,7 +117,8 @@
 
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			if (session?.user) {
-				currentUser = session.user.user_metadata.full_name || session.user.email?.split('@')[0];
+				currentUser =
+					session.user.user_metadata.full_name || session.user.email?.split('@')[0];
 			}
 		});
 
@@ -224,7 +264,9 @@
 			: 'opacity-100'}"
 	>
 		<div class="flex w-full select-none justify-between">
-			<div class="flex flex-col gap-2 text-[10px] font-bold tracking-widest text-sub opacity-60">
+			<div
+				class="flex flex-col gap-2 text-[10px] font-bold tracking-widest text-sub opacity-60"
+			>
 				<div class="flex items-center gap-3">
 					<kbd
 						class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm"
