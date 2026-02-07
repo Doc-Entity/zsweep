@@ -267,14 +267,17 @@
 			<div
 				class="flex flex-col gap-2 text-[10px] font-bold tracking-widest text-sub opacity-60"
 			>
-				<div class="flex items-center gap-3">
+				<button
+					class="pointer-events-auto flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-100"
+					on:click={() => ($page.url.pathname === '/' ? location.reload() : goto('/'))}
+				>
 					<kbd
 						class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm"
 						>tab</kbd
 					>
 					<span class="h-[1px] w-3 bg-sub/30"></span>
 					<span>restart</span>
-				</div>
+				</button>
 
 				<div class="flex items-center gap-3">
 					<kbd
@@ -285,14 +288,17 @@
 					<span>flag/chord</span>
 				</div>
 
-				<div class="flex items-center gap-3">
+				<button
+					class="pointer-events-auto flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-100"
+					on:click={() => (showPalette = !showPalette)}
+				>
 					<kbd
 						class="flex min-w-[36px] justify-center rounded bg-sub/20 px-1.5 py-0.5 font-mono text-text shadow-sm"
 						>:</kbd
 					>
 					<span class="h-[1px] w-3 bg-sub/30"></span>
 					<span>palette</span>
-				</div>
+				</button>
 			</div>
 
 			<div

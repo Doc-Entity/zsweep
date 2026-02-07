@@ -619,7 +619,7 @@
 			mode={game.mode}
 			totalMines={stats.sessionTotalMines}
 			totalGlobalSeconds={data?.stats?.seconds || 0}
-			on:restart={fullReset}
+			restart={fullReset}
 		/>
 	{:else}
 		<div

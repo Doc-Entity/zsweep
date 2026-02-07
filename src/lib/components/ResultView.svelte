@@ -17,6 +17,7 @@
 	export let mode: 'standard' | 'time' = 'standard';
 	export let cells = 0;
 	export let totalGlobalSeconds = 0;
+	export let restart: () => void;
 
 	let chartCanvas: HTMLCanvasElement;
 	let chartInstance: Chart | null = null;
@@ -172,9 +173,14 @@
 				<span>View Map</span>
 			</button>
 		{/if}
-		<span class="text-xs text-sub opacity-40"
-			>press <kbd class="font-sans">tab</kbd> to restart</span
+
+		<button
+			type="button"
+			class="cursor-pointer text-xs text-sub opacity-40 transition-opacity hover:opacity-100"
+			on:click={restart}
 		>
+			press <kbd class="font-sans">tab</kbd> to restart
+		</button>
 	</div>
 </div>
 
@@ -205,13 +211,5 @@
 	.boom-text {
 		color: transparent;
 		-webkit-text-stroke: 2px #ef4444;
-	}
-
-	.glitch-text {
-		position: relative;
-		text-shadow:
-			2px 0 #0ff,
-			-2px 0 #f00;
-		animation: glitch-skew 1s infinite linear alternate-reverse;
 	}
 </style>
