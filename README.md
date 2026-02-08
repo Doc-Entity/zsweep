@@ -6,25 +6,26 @@
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 
-
 <div align="center">
+  <h1><code>zsweep</code></h1>
+
+  <a href="https://zsweep.com">
+    <img src="https://github.com/user-attachments/assets/3cc33aa0-d930-42c2-915b-c82738ad6a7e" alt="zsweep gameplay demo" />
+  </a>
+
+  <br />
+
   <a href="https://zsweep.com">
     <img src="static/images/zee.png" alt="zsweep logo" width="80" height="80">
   </a>
-  <h1 align="center"><code>zsweep</code></h1>
+
+  <p>
+    <a href="https://zsweep.com">
+      <strong>▶ PLAY</strong>
+    </a>
+  </p>
+  <br />
 </div>
-
-
-<p align="center">
-  <img src= "https://github.com/user-attachments/assets/3cc33aa0-d930-42c2-915b-c82738ad6a7e" alt="difi_demo" />
-</p>
-<p align="center">
-  <a href="https://zsweep.com">
-    <strong>▶ PLAY </strong>
-  </a>
-</p>
-<br />
-
 
 <details>
   <summary>Table of Contents</summary>
