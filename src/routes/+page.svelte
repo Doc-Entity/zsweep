@@ -46,7 +46,7 @@
 
 	let game = {
 		mode: 'standard' as 'time' | 'standard',
-		size: GAME_CONFIG.gridSizes[0],
+		size: GAME_CONFIG.gridSizes[2],
 		timeLimit: 15,
 		state: 'pending' as 'pending' | 'playing' | 'finished',
 		grid: [] as Cell[][],
